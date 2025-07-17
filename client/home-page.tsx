@@ -45,7 +45,7 @@ export default function HomePage({ onPageChange }: HomePageProps) {
               Lifebeat
             </h1>
           </div>
-          <p className="text-2xl text-gray-600 mb-4 text-center">For every heartbeat that matters</p>
+          <p className="text-2xl text-gray-600 mb-4 text-center font-semibold">For every heartbeat that matters</p>
           <p className="text-xl text-gray-500 max-w-3xl mx-auto mb-8 leading-relaxed">
             Empowering you to assess your heart health and risk of heart attack using advanced machine learning
             technology.
