@@ -1,6 +1,20 @@
+// C:\Users\Home\com.lang.practice\Heart_Attack_Prediction\client\app\precautions-page\page.tsx
 "use client"
 
-import { Heart, Activity, Apple, Scale, Cigarette, Wine, Brain, Stethoscope, Users, ExternalLink, Shield, CheckCircle } from 'lucide-react'
+import {
+  Heart,
+  Activity,
+  Apple,
+  Scale,
+  Cigarette,
+  Wine,
+  Brain,
+  Stethoscope,
+  Users,
+  ExternalLink,
+  Shield,
+  CheckCircle,
+} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

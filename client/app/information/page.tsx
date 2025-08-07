@@ -1,10 +1,12 @@
+// C:\Users\Home\com.lang.practice\Heart_Attack_Prediction\client\app\information\page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
-import { Heart, Activity, Target, Lightbulb } from 'lucide-react'
+import { Heart, Activity, Target, Lightbulb } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 const heartHealthTips = [
   "Stay active with at least 30 minutes of exercise daily.",
@@ -14,7 +16,7 @@ const heartHealthTips = [
   "Regularly monitor your blood pressure and cholesterol levels.",
 ]
 
-export default function InformationPage() {
+export default function LifebeatApp() {
   const [currentTip, setCurrentTip] = useState("")
   const [activeTab, setActiveTab] = useState("importance")
 
@@ -31,7 +33,7 @@ export default function InformationPage() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="h-8 w-8 text-red-500 animate-pulse" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-              LifeBeat Information
+              Lifebeat
             </h1>
           </div>
           <p className="text-xl text-gray-600 mb-2">For every heartbeat that matters</p>
@@ -40,7 +42,7 @@ export default function InformationPage() {
           </p>
         </div>
 
-        {/* Tabs */}
+        {/* Flipping Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/50 backdrop-blur-sm border border-white/20">
             <TabsTrigger
@@ -66,7 +68,7 @@ export default function InformationPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab Content */}
+          {/* Tab Content with Flip Animation */}
           <div className="relative">
             <TabsContent
               value="importance"
@@ -99,9 +101,14 @@ export default function InformationPage() {
                     </div>
                     <div className="flex justify-center">
                       <div className="relative">
-                        <div className="w-64 h-64 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center">
-                          <Heart className="h-32 w-32 text-red-500 animate-pulse" />
-                        </div>
+                        <Image
+                          src="/placeholder.jpg"
+                          alt="Healthy Heart"
+                          width={300}
+                          height={300}
+                          className="rounded-full shadow-lg border-4 border-white"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-red-500/20 to-transparent rounded-full"></div>
                       </div>
                     </div>
                   </div>
@@ -144,9 +151,13 @@ export default function InformationPage() {
                         </div>
                       </div>
                       <div className="flex justify-center">
-                        <div className="w-64 h-48 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg flex items-center justify-center">
-                          <Activity className="h-24 w-24 text-orange-600" />
-                        </div>
+                        <Image
+                          src="/placeholder.jpg"
+                          alt="Heart Attack Illustration"
+                          width={300}
+                          height={250}
+                          className="rounded-lg shadow-lg border border-white"
+                        />
                       </div>
                     </div>
                   </div>
@@ -168,10 +179,11 @@ export default function InformationPage() {
                 <CardContent>
                   <div className="space-y-6">
                     <p className="text-lg text-gray-700 leading-relaxed">
-                      LifeBeat is designed to provide you with a simple tool to gauge your heart attack risk. By
+                      Lifebeat is designed to provide you with a simple tool to gauge your heart attack risk. By
                       leveraging advanced machine learning, we aspire to raise awareness about heart health and promote
                       proactive care.
                     </p>
+
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <h4 className="text-xl font-semibold text-gray-800">Our Goals</h4>
@@ -190,6 +202,7 @@ export default function InformationPage() {
                           </div>
                         </div>
                       </div>
+
                       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100">
                         <div className="flex items-center gap-2 mb-3">
                           <Lightbulb className="h-5 w-5 text-blue-600" />

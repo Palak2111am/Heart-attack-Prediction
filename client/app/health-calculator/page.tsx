@@ -1,7 +1,8 @@
+// C:\Users\Home\com.lang.practice\Heart_Attack_Prediction\client\app\health-calculator\page.tsx
 "use client"
 
 import { useState } from "react"
-import { Calculator, Heart, Scale, Activity, Droplets } from 'lucide-react'
+import { Calculator, Heart, Scale, Activity, Droplets } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -45,6 +46,7 @@ export default function HealthCalculator() {
     const bmi = bmiData.weight / (bmiData.height * bmiData.height)
     let category = ""
     let color = ""
+
     if (bmi < 18.5) {
       category = "Underweight"
       color = "text-blue-600"
@@ -58,6 +60,7 @@ export default function HealthCalculator() {
       category = "Obese"
       color = "text-red-600"
     }
+
     setBmiData({ ...bmiData, result: { bmi: Math.round(bmi * 10) / 10, category, color } })
   }
 
@@ -74,14 +77,17 @@ export default function HealthCalculator() {
 
   // Blood Pressure Calculation
   const calculateBP = () => {
+    // Simplified estimation based on age and heart rate
     const baseSystolic = 120 + (bpData.age - 30) * 0.5
     const baseDiastolic = 80 + (bpData.age - 30) * 0.3
     const hrAdjustment = (bpData.heartRate - 70) * 0.2
+
     const systolic = Math.round(baseSystolic + hrAdjustment)
     const diastolic = Math.round(baseDiastolic + hrAdjustment * 0.5)
 
     let category = ""
     let color = ""
+
     if (systolic < 120 && diastolic < 80) {
       category = "Normal"
       color = "text-green-600"
@@ -95,21 +101,24 @@ export default function HealthCalculator() {
       category = "High Blood Pressure Stage 2"
       color = "text-red-600"
     }
+
     setBpData({ ...bpData, result: { systolic, diastolic, category, color } })
   }
 
   // Cholesterol Calculation
   const calculateCholesterol = () => {
+    // Simplified estimation based on age and gender
     let baseTotal = 180
     if (cholesterolData.gender === "male") {
       baseTotal += cholesterolData.age * 0.8
     } else {
       baseTotal += cholesterolData.age * 0.6
     }
-    const total = Math.round(baseTotal)
 
+    const total = Math.round(baseTotal)
     let category = ""
     let color = ""
+
     if (total < 200) {
       category = "Desirable"
       color = "text-green-600"
@@ -120,6 +129,7 @@ export default function HealthCalculator() {
       category = "High"
       color = "text-red-600"
     }
+
     setCholesterolData({ ...cholesterolData, result: { total, category, color } })
   }
 
@@ -192,10 +202,12 @@ export default function HealthCalculator() {
                   />
                 </div>
               </div>
+
               <Button onClick={calculateBMI} className="w-full bg-blue-500 hover:bg-blue-600">
                 <Scale className="h-4 w-4 mr-2" />
                 Calculate BMI
               </Button>
+
               {bmiData.result && (
                 <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className={`text-3xl font-bold ${bmiData.result.color}`}>{bmiData.result.bmi}</div>
@@ -268,10 +280,12 @@ export default function HealthCalculator() {
                   </Select>
                 </div>
               </div>
+
               <Button onClick={calculateBMR} className="w-full bg-green-500 hover:bg-green-600">
                 <Activity className="h-4 w-4 mr-2" />
                 Calculate BMR
               </Button>
+
               {bmrData.result && (
                 <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="text-3xl font-bold text-green-600">{bmrData.result}</div>
@@ -317,10 +331,12 @@ export default function HealthCalculator() {
                   />
                 </div>
               </div>
+
               <Button onClick={calculateBP} className="w-full bg-red-500 hover:bg-red-600">
                 <Heart className="h-4 w-4 mr-2" />
                 Calculate Blood Pressure
               </Button>
+
               {bpData.result && (
                 <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
                   <div className="text-2xl font-bold text-red-600">
@@ -334,6 +350,7 @@ export default function HealthCalculator() {
                   </Badge>
                 </div>
               )}
+
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                 <h4 className="font-semibold text-blue-800 mb-2">Best Practices to Follow:</h4>
                 <ul className="text-sm text-blue-700 space-y-1">
@@ -383,10 +400,12 @@ export default function HealthCalculator() {
                   </Select>
                 </div>
               </div>
+
               <Button onClick={calculateCholesterol} className="w-full bg-purple-500 hover:bg-purple-600">
                 <Droplets className="h-4 w-4 mr-2" />
                 Calculate Total Cholesterol
               </Button>
+
               {cholesterolData.result && (
                 <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
                   <div className="text-3xl font-bold text-purple-600">{cholesterolData.result.total}</div>
