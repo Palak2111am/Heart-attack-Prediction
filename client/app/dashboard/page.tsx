@@ -1,260 +1,219 @@
-"use client"
+// C:\Users\Home\com.lang.practice\Heart_Attack_Prediction\client\app\dashboard\page.tsx
+"use client";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart } from "lucide-react";
+import { Scatter, Bar } from "react-chartjs-2";
+import { Chart, CategoryScale, LinearScale, PointElement, BarElement, Tooltip, Legend } from "chart.js";
+import "chartjs-chart-box-and-violin-plot";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, TrendingUp, Activity, Heart } from 'lucide-react'
-import { Alert, AlertDescription } from "@/components/ui/alert"
+// Register Chart.js components
+Chart.register(CategoryScale, LinearScale, PointElement, BarElement, Tooltip, Legend); // Register BoxPlot components
 
-interface ModelMetrics {
-  accuracy?: number
-  precision?: number
-  recall?: number
-  f1_score?: number
-  error?: string
-}
-
-// Sample data for visualizations
 const sampleData = [
-  { age: 63, sex: 1, cp: 3, chol: 233, target: 1 },
-  { age: 37, sex: 1, cp: 2, chol: 250, target: 0 },
-  { age: 41, sex: 0, cp: 1, chol: 204, target: 0 },
-  { age: 68, sex: 1, cp: 0, chol: 193, target: 1 },
-  { age: 57, sex: 1, cp: 0, chol: 131, target: 1 },
-  { age: 57, sex: 0, cp: 1, chol: 236, target: 0 },
-  { age: 45, sex: 1, cp: 2, chol: 280, target: 1 },
-  { age: 52, sex: 0, cp: 0, chol: 190, target: 0 },
-]
+    { age: 63, sex: 1, cp: 3, chol: 233 },
+    { age: 37, sex: 1, cp: 2, chol: 250 },
+    { age: 41, sex: 0, cp: 1, chol: 204 },
+    { age: 68, sex: 1, cp: 0, chol: 193 },
+    { age: 57, sex: 1, cp: 0, chol: 131 },
+    { age: 57, sex: 0, cp: 1, chol: 236 },
+];
+
+// Chart data
+const scatterData = {
+    datasets: [
+        {
+            label: "Age vs Cholesterol",
+            data: sampleData.map((d) => ({ x: d.age, y: d.chol })),
+            backgroundColor: "rgba(34,197,94,0.6)",
+        },
+    ],
+};
+
+const barData = {
+    labels: [...new Set(sampleData.map((d) => d.cp))],
+    datasets: [
+        {
+            label: "Chest Pain Types",
+            data: [...new Set(sampleData.map((d) => d.cp))].map((cp) =>
+                sampleData.filter((d) => d.cp === cp).length
+            ),
+            backgroundColor: "rgba(59,130,246,0.6)",
+        },
+    ],
+};
+
+const histData = {
+    labels: sampleData.map((d) => d.age),
+    datasets: [
+        {
+            label: "Age Distribution",
+            data: sampleData.map((d) => d.age),
+            backgroundColor: "rgba(239,68,68,0.6)",
+        },
+    ],
+};
+
+// BoxPlot data for Age vs Cholesterol by Gender
+const boxPlotData = {
+    labels: ["Male", "Female"],
+    datasets: [
+        {
+            label: "Cholesterol by Gender",
+            backgroundColor: "rgba(59,130,246,0.6)",
+            borderColor: "rgba(59,130,246,1)",
+            borderWidth: 1,
+            outlierColor: "#999999",
+            padding: 10,
+            itemRadius: 0,
+            data: [
+                sampleData.filter((d) => d.sex === 1).map((d) => d.chol),
+                sampleData.filter((d) => d.sex === 0).map((d) => d.chol),
+            ],
+        },
+    ],
+};
+
+// Example model accuracy (you can replace this with actual model accuracy)
+const modelAccuracy = 0.85; // 85% accuracy
+
+// Confusion matrix sample data as a simple table
+const confusionMatrix = [
+    [50, 10],
+    [5, 35],
+];
+
+const confusionMatrixLabels = ["Negative", "Positive"];
+
+// Correlation heatmap sample data
+const correlationData = [
+    [1, 0.2, -0.3, 0.5],
+    [0.2, 1, -0.1, 0.4],
+    [-0.3, -0.1, 1, -0.2],
+    [0.5, 0.4, -0.2, 1],
+];
+
+const correlationLabels = ["Age", "Sex", "CP", "Chol"];
 
 export default function DashboardPage() {
-  const [metrics, setMetrics] = useState<ModelMetrics | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchMetrics()
-  }, [])
-
-  const fetchMetrics = async () => {
-    try {
-      const response = await fetch('/api/metrics')
-      const data = await response.json()
-      setMetrics(data)
-    } catch (error) {
-      setMetrics({ error: 'Failed to fetch model metrics' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Calculate statistics from sample data
-  const avgAge = sampleData.reduce((sum, item) => sum + item.age, 0) / sampleData.length
-  const avgChol = sampleData.reduce((sum, item) => sum + item.chol, 0) / sampleData.length
-  const maleCount = sampleData.filter(item => item.sex === 1).length
-  const femaleCount = sampleData.filter(item => item.sex === 0).length
-  const positiveCount = sampleData.filter(item => item.target === 1).length
-  const negativeCount = sampleData.filter(item => item.target === 0).length
-
-  // Age distribution
-  const ageGroups = {
-    '30-40': sampleData.filter(item => item.age >= 30 && item.age < 40).length,
-    '40-50': sampleData.filter(item => item.age >= 40 && item.age < 50).length,
-    '50-60': sampleData.filter(item => item.age >= 50 && item.age < 60).length,
-    '60+': sampleData.filter(item => item.age >= 60).length,
-  }
-
-  // Chest pain type distribution
-  const cpTypes = {
-    'Typical Angina': sampleData.filter(item => item.cp === 0).length,
-    'Atypical Angina': sampleData.filter(item => item.cp === 1).length,
-    'Non-Anginal': sampleData.filter(item => item.cp === 2).length,
-    'Asymptomatic': sampleData.filter(item => item.cp === 3).length,
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-red-50 to-rose-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <BarChart className="h-10 w-10 text-red-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-              Analytics Dashboard
+    return (
+        <div className="container mx-auto p-4">
+            <h1 className="text-4xl font-bold text-center mb-8">
+                Data Visualization Dashboard
             </h1>
-          </div>
-          <p className="text-lg text-gray-600">
-            Model performance metrics and data insights
-          </p>
-        </div>
 
-        {/* Model Performance Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Accuracy</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {loading ? '...' : metrics?.accuracy ? `${(metrics.accuracy * 100).toFixed(1)}%` : 'N/A'}
-              </div>
-              <p className="text-xs text-gray-500">Model prediction accuracy</p>
-            </CardContent>
-          </Card>
+            {/* Model Accuracy Section */}
+            <Card className="mb-8 bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardHeader>
+                    <CardTitle className="text-2xl text-green-600">
+                        Model Accuracy
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-lg font-semibold">
+                        The model's accuracy is: <span className="text-green-600">{(modelAccuracy * 100).toFixed(2)}%</span>
+                    </p>
+                </CardContent>
+            </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Precision</CardTitle>
-              <Activity className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {loading ? '...' : metrics?.precision ? `${(metrics.precision * 100).toFixed(1)}%` : 'N/A'}
-              </div>
-              <p className="text-xs text-gray-500">True positive rate</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Recall</CardTitle>
-              <Heart className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {loading ? '...' : metrics?.recall ? `${(metrics.recall * 100).toFixed(1)}%` : 'N/A'}
-              </div>
-              <p className="text-xs text-gray-500">Sensitivity measure</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">F1 Score</CardTitle>
-              <BarChart className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {loading ? '...' : metrics?.f1_score ? `${(metrics.f1_score * 100).toFixed(1)}%` : 'N/A'}
-              </div>
-              <p className="text-xs text-gray-500">Harmonic mean</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {metrics?.error && (
-          <Alert variant="destructive" className="mb-8">
-            <AlertDescription>{metrics.error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Data Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-red-600">Dataset Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-red-50 rounded-lg">
-                  <div className="text-2xl font-bold text-red-600">{sampleData.length}</div>
-                  <div className="text-sm text-gray-600">Total Samples</div>
-                </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{avgAge.toFixed(0)}</div>
-                  <div className="text-sm text-gray-600">Avg Age</div>
-                </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{avgChol.toFixed(0)}</div>
-                  <div className="text-sm text-gray-600">Avg Cholesterol</div>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{((positiveCount / sampleData.length) * 100).toFixed(0)}%</div>
-                  <div className="text-sm text-gray-600">Risk Cases</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-red-600">Gender Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Male</span>
-                  <span className="text-sm text-gray-600">{maleCount} ({((maleCount / sampleData.length) * 100).toFixed(0)}%)</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${(maleCount / sampleData.length) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Female</span>
-                  <span className="text-sm text-gray-600">{femaleCount} ({((femaleCount / sampleData.length) * 100).toFixed(0)}%)</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-pink-600 h-2 rounded-full"
-                    style={{ width: `${(femaleCount / sampleData.length) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Age Groups and Chest Pain Types */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-red-600">Age Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {Object.entries(ageGroups).map(([group, count]) => (
-                  <div key={group} className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{group}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-red-600 h-2 rounded-full"
-                          style={{ width: `${(count / sampleData.length) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-8">{count}</span>
+            {/* Data Visualization Dashboard Section */}
+            <Card className="mb-8 bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-2xl text-green-600">
+                        <BarChart className="h-6 w-6" />
+                        Data Visualization Dashboard
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Scatter Plot: Age vs Cholesterol
+                            </h4>
+                            <Scatter data={scatterData} />
+                        </div>
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Histogram: Age Distribution
+                            </h4>
+                            <Bar data={histData} />
+                        </div>
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Bar Chart: Chest Pain Types
+                            </h4>
+                            <Bar data={barData} />
+                        </div>
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Box Plot: Cholesterol by Gender
+                            </h4>
+                            <div className="bg-white rounded-md flex items-center justify-center">
+                                <Bar
+                                    data={boxPlotData}
+                                    options={{
+                                        responsive: true,
+                                        plugins: {
+                                            legend: { display: true },
+                                            title: { display: true, text: "Cholesterol Levels by Gender" },
+                                        },
+                                    }}
+                                    width={400}
+                                    height={200}
+                                />
+                            </div>
+                        </div>
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Confusion Matrix
+                            </h4>
+                            <table className="mx-auto border border-gray-300">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        {confusionMatrixLabels.map((label) => (
+                                            <th key={label} className="border border-gray-300 px-4 py-2">{label}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {confusionMatrix.map((row, i) => (
+                                        <tr key={i}>
+                                            <th className="border border-gray-300 px-4 py-2">{confusionMatrixLabels[i]}</th>
+                                            {row.map((value, j) => (
+                                                <td key={j} className="border border-gray-300 px-4 py-2">{value}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center md:col-span-2">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                                Correlation Heatmap
+                            </h4>
+                            <div className="grid grid-cols-4 gap-2 mx-auto w-max">
+                                {correlationLabels.map((rowLabel, rowIndex) =>
+                                    correlationLabels.map((colLabel, colIndex) => {
+                                        const value = correlationData[rowIndex][colIndex];
+                                        const bgColor = value > 0 ? `rgba(34,197,94,${Math.abs(value)})` : `rgba(239,68,68,${Math.abs(value)})`;
+                                        return (
+                                            <div
+                                                key={`${rowIndex}-${colIndex}`}
+                                                className="w-12 h-12 flex items-center justify-center text-white font-semibold rounded"
+                                                style={{ backgroundColor: bgColor }}
+                                                title={`Correlation between ${rowLabel} and ${colLabel}: ${value.toFixed(2)}`}
+                                            >
+                                                {value.toFixed(2)}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-red-600">Chest Pain Types</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {Object.entries(cpTypes).map(([type, count]) => (
-                  <div key={type} className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{type}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-600 h-2 rounded-full"
-                          style={{ width: `${(count / sampleData.length) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-8">{count}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+            </Card>
         </div>
-      </div>
-    </div>
-  )
+    );
 }

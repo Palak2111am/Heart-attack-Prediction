@@ -1,5 +1,3 @@
-// C:\Users\Home\com.lang.practice\Heart_Attack_Prediction\client\app\chatbot\page.tsx
-
 "use client"
 
 import { useState, useRef, useEffect } from "react"
@@ -82,40 +80,40 @@ export default function ChatbotPage() {
         }),
       })
 
-    const data = await response.json()
+      const data = await response.json()
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to get response from chatbot')
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response from chatbot')
+      }
+      
+      // Add assistant message
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, assistantMessage])
+    } catch (error) {
+      console.error('Chatbot error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.'
+      setError(errorMessage)
+      
+      // Add error message
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `I apologize, but I'm having trouble right now: ${errorMessage}\n\nPlease try asking your question again, or contact our support team if the issue persists.`,
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
+      setIsLoading(false)
+      inputRef.current?.focus()
     }
-    
-    // Add assistant message
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: data.response,
-      timestamp: new Date()
-    }
-    
-    setMessages(prev => [...prev, assistantMessage])
-  } catch (error) {
-    console.error('Chatbot error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.'
-    setError(errorMessage)
-    
-    // Add error message
-    const errorResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: `I apologize, but I'm having trouble right now: ${errorMessage}\n\nPlease try asking your question again, or contact our support team if the issue persists.`,
-      timestamp: new Date()
-    }
-    
-    setMessages(prev => [...prev, errorResponse])
-  } finally {
-    setIsLoading(false)
-    inputRef.current?.focus()
   }
-}
 
   const clearChat = () => {
     setMessages([
@@ -137,7 +135,11 @@ export default function ChatbotPage() {
   }
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    }).toLowerCase()
   }
 
   return (

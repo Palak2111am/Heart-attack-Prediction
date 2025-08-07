@@ -1,31 +1,58 @@
 from fastapi import FastAPI, HTTPException
-import os
 from dotenv import load_dotenv
-from langchain_community.llms import HuggingFaceHub
+from pydantic import BaseModel, validator
+import os
+import google.generativeai as genai
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Get your Hugging Face API token
-HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-if not HUGGINGFACEHUB_API_TOKEN:
-    raise ValueError("HUGGINGFACEHUB_API_TOKEN is missing in environment")
+# Get your Gemini API key from environment
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")  # default model
 
-# Set up the LLM
-llm = HuggingFaceHub(
-    repo_id="google/flan-t5-large",
-    model_kwargs={"temperature": 0.5, "max_length": 128},
-    huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
-)
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY is missing in environment")
+
+# Configure Gemini
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel(GEMINI_MODEL)
 
 # Initialize FastAPI
 app = FastAPI()
 
+# Define data model with validation
+class HeartAttackData(BaseModel):
+    age: int
+    sex: str
+    chest_pain_type: str
+    resting_blood_pressure: int
+    cholesterol: int
+    fasting_blood_sugar: int
+    resting_ecg: str
+    max_heart_rate: int
+    exercise_induced_angina: str
+    st_depression: float
+    st_slope: str
+    num_major_vessels: int
+    thalassemia: str
+
+    @validator('age')
+    def age_must_be_positive(cls, value):
+        if value <= 0:
+            raise ValueError('Age must be a positive integer')
+        return value
+
+    @validator('sex', 'chest_pain_type', 'resting_ecg', 'exercise_induced_angina', 'st_slope', 'thalassemia')
+    def string_must_not_be_empty(cls, value):
+        if not value.strip():
+            raise ValueError('String must not be empty')
+        return value
 
 @app.post("/predict_heart_attack")
 async def predict_heart_attack(data: dict):
     try:
-        # Construct the prompt from input
+        # Construct prompt
         prompt = (
             f"Predict the chance of a heart attack for the following patient:\n"
             f"Age: {data['age']}\n"
@@ -44,15 +71,11 @@ async def predict_heart_attack(data: dict):
             f"Return the result as a percentage."
         )
 
-        # Use Hugging Face model to generate prediction
-        prediction = llm.invoke(prompt)
+        # Generate response from Gemini
+        response = model.generate_content(prompt)
+        prediction = response.text.strip()
 
-        return {
-            "prediction": prediction.strip()
-        }
+        return {"prediction": prediction}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# Run with: uvicorn app.fastapi_app:app --reload
