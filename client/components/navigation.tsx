@@ -1,125 +1,106 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Heart,
-  Shield,
-  FileText,
-  Menu,
-  Home,
-  Activity,
-  Calculator,
-  MessageSquare,
-  User,
-} from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Heart, Menu, X, Home, Activity, BarChart3, User, Calculator, Info, Shield, FileText, MessageCircle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
-interface NavigationProps {
-  currentPage: string
-  onPageChange: (page: string) => void
-}
+const navigation = [
+  { name: "Home", href: "/", icon: Home },
+  { name: "Information", href: "/information", icon: Info },
+  { name: "Prediction", href: "/prediction", icon: Activity },
+  { name: "Health Calculator", href: "/health-calculator", icon: Calculator },
+  { name: "Chatbot", href: "/chatbot", icon: MessageCircle },
+  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
+  { name: "Precautions", href: "/precautions-page", icon: Shield },
+  { name: "Privacy Policy", href: "/privacy-policy", icon: FileText },
+  { name: "Contact", href: "/contact", icon: User },
+]
 
-export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const menuItems = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "lifebeat", label: "Lifebeat App", icon: Heart },
-    { id: "prediction", label: "Heart Prediction", icon: Activity },
-    { id: "calculator", label: "Health Calculator", icon: Calculator },
-    { id: "precautions", label: "Precautions", icon: Shield },
-    { id: "feedback", label: "Feedback", icon: MessageSquare },
-    { id: "privacy", label: "Privacy Policy", icon: FileText },
-  ]
-
-  const handleNavigation = (pageId: string) => {
-    onPageChange(pageId)
-    setIsOpen(false)
-  }
+export default function Navigation() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
-    <>
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 w-full">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <Heart className="h-8 w-8 text-red-500 animate-pulse" />
+    <nav className="bg-white/80 backdrop-blur-md border-b border-red-100 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center gap-2">
+              <Heart className="h-8 w-8 text-red-600" />
               <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                Lifebeat
+                LifeBeat
               </span>
-            </div>
+            </Link>
+          </div>
 
-            {/* Menu Items */}
-            <div className="flex items-center space-x-1">
-              {menuItems.map((item) => {
-                const IconComponent = item.icon
-                return (
-                  <Button
-                    key={item.id}
-                    className={`flex items-center gap-2 ${
-                      currentPage === item.id
-                        ? "bg-red-500 text-white hover:bg-red-600"
-                        : "text-white"
-                    }`}
-                    onClick={() => handleNavigation(item.id)}
-                  >
-                    <IconComponent className="h-4 w-4" />
-                    {item.label}
-                  </Button>
-                )
-              })}
-            </div>
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    pathname === item.href
+                      ? "bg-red-100 text-red-700"
+                      : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="lg:hidden flex items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <Heart className="h-6 w-6 text-red-500 animate-pulse" />
-              <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                Lifebeat
-              </span>
-            </div>
-
-            {/* Mobile Menu */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button>
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-80">
-                <div className="flex flex-col space-y-4 mt-8">
-                  {menuItems.map((item) => {
-                    const IconComponent = item.icon
-                    return (
-                      <Button
-                        key={item.id}
-                        className={`flex items-center gap-3 justify-start h-12 ${
-                          currentPage === item.id
-                            ? "bg-red-500 text-white hover:bg-red-600"
-                            : "text-white"
-                        }`}
-                        onClick={() => handleNavigation(item.id)}
-                      >
-                        <IconComponent className="h-5 w-5" />
-                        {item.label}
-                      </Button>
-                    )
-                  })}
-                </div>
-              </SheetContent>
-            </Sheet>
+      {mobileMenuOpen && (
+        <div className="lg:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-red-100 max-h-96 overflow-y-auto">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium transition-colors",
+                    pathname === item.href
+                      ? "bg-red-100 text-red-700"
+                      : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.name}
+                </Link>
+              )
+            })}
           </div>
         </div>
-      </nav>
-    </>
+      )}
+    </nav>
   )
 }

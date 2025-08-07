@@ -1,58 +1,58 @@
-from fastapi import FastAPI
-import openai
-import uvicorn
+from fastapi import FastAPI, HTTPException
 import os
 from dotenv import load_dotenv
+from langchain_community.llms import HuggingFaceHub
 
-load_dotenv()  # take environment variables from .env.
-# Set up OpenAI API credentials
-openai.api_key = os.environ["OPENAI_API_KEY"]
+# Load environment variables from .env file
+load_dotenv()
 
-# Initialize FastAPI app
+# Get your Hugging Face API token
+HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+if not HUGGINGFACEHUB_API_TOKEN:
+    raise ValueError("HUGGINGFACEHUB_API_TOKEN is missing in environment")
+
+# Set up the LLM
+llm = HuggingFaceHub(
+    repo_id="google/flan-t5-large",
+    model_kwargs={"temperature": 0.5, "max_length": 128},
+    huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
+)
+
+# Initialize FastAPI
 app = FastAPI()
 
-# Define a POST route to predict heart attack
+
 @app.post("/predict_heart_attack")
 async def predict_heart_attack(data: dict):
-    # Extract necessary information from the request data
-    age = data['age']
-    sex = data['sex']
-    cp = data['chest_pain_type']
-    trestbps = data['resting_blood_pressure']
-    chol = data['cholesterol']
-    fbs = data['fasting_blood_sugar']
-    restecg = data['resting_ecg']
-    thalach = data['max_heart_rate']
-    exang = data['exercise_induced_angina']
-    oldpeak = data['st_depression']
-    slope = data['st_slope']
-    ca = data['num_major_vessels']
-    thal = data['thalassemia']
+    try:
+        # Construct the prompt from input
+        prompt = (
+            f"Predict the chance of a heart attack for the following patient:\n"
+            f"Age: {data['age']}\n"
+            f"Sex: {data['sex']}\n"
+            f"Chest Pain Type: {data['chest_pain_type']}\n"
+            f"Resting Blood Pressure: {data['resting_blood_pressure']}\n"
+            f"Cholesterol: {data['cholesterol']}\n"
+            f"Fasting Blood Sugar: {data['fasting_blood_sugar']}\n"
+            f"Resting ECG: {data['resting_ecg']}\n"
+            f"Max Heart Rate: {data['max_heart_rate']}\n"
+            f"Exercise Induced Angina: {data['exercise_induced_angina']}\n"
+            f"ST Depression: {data['st_depression']}\n"
+            f"ST Slope: {data['st_slope']}\n"
+            f"Num Major Vessels: {data['num_major_vessels']}\n"
+            f"Thalassemia: {data['thalassemia']}\n"
+            f"Return the result as a percentage."
+        )
 
-    # Generate a prompt for GPT-3
-    prompt = f"Predict the probability of heart attack based on the following inputs:\n\nAge: {age}\nSex: {sex}\nChest Pain Type: {cp}\nResting Blood Pressure: {trestbps}\nCholesterol: {chol}\nFasting Blood Sugar: {fbs}\nResting ECG: {restecg}\nMax Heart Rate: {thalach}\nExercise Induced Angina: {exang}\nST Depression: {oldpeak}\nST Slope: {slope}\nNum Major Vessels: {ca}\nThalassemia: {thal}\n\n"
+        # Use Hugging Face model to generate prediction
+        prediction = llm.invoke(prompt)
 
-    # Use GPT-3 to generate the prediction
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=1,
-        n=1,
-        stop=None,
-        temperature=0.2,##0.5,
-        top_p=0.9,##1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
+        return {
+            "prediction": prediction.strip()
+        }
 
-    if prediction := response.choices[0].text.strip():
-        # Convert prediction to percentage
-        prediction_percentage = float(prediction) * 100
-        # Return the prediction as a JSON response
-        return {"prediction": prediction, "percentage": prediction_percentage, "prediction_percentage": f"{prediction_percentage:.2f}%"}
-    else:
-        return {"message": "Unable to make a prediction"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Run the FastAPI app
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Run with: uvicorn app.fastapi_app:app --reload
