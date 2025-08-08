@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const data: PredictionRequest = await request.json()
     
     // First, try to connect to your FastAPI backend
-    const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000'
+    const FASTAPI_URL = process.env.NEXT_PUBLIC_FASTAPI_BACKEND_URL || 'http://localhost:8000'
     
     try {
       console.log('Attempting to connect to FastAPI backend at:', FASTAPI_URL)
