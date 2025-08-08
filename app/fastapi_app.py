@@ -3,7 +3,7 @@
 import datetime
 from fastapi import FastAPI, HTTPException
 import logging
-from ai_integration import generate_response
+from .ai_integration import generate_response
 from pydantic import BaseModel
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
